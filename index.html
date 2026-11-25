@@ -463,6 +463,7 @@
                 servicesBar.innerHTML += `<div class="service-badge"><span>🛵</span> توصيل سريع ضمن دمشق وريفها</div>`;
                 deliverySelect.innerHTML += `<option value="توصيل ضمن دمشق وريفها">توصيل ضمن دمشق وريفها</option>`;
             }
+
             if (storeData.services.shipping) {
                 servicesBar.innerHTML += `<div class="service-badge"><span>🚚</span> شحن لكافة المحافظات</div>`;
                 deliverySelect.innerHTML += `<option value="شحن للمحافظات">شحن للمحافظات</option>`;
@@ -671,7 +672,23 @@ async function openAdminLogin() {
             filesInput.value = '';
             alert("تمت إضافة الشمعة بنجاح!");
         }
+const VIOLA_WORKER_URL = "https://viola-admin-api.albarrirama.workers.dev";
 
+async function syncProductsToServer(adminPassword) {
+  const res = await fetch(VIOLA_WORKER_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "save_products",
+      password: adminPassword,
+      products: storeData.products
+    })
+  });
+  const data = await res.json();
+  if (!res.ok || !data.ok) {
+    throw new Error(data.error || "فشل حفظ المنتجات على السيرفر");
+  }
+}
         function toBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -685,6 +702,15 @@ async function openAdminLogin() {
             if (confirm("هل أنت متأكد من حذف هذا المنتج؟")) {
                 storeData.products.splice(index, 1);
                 saveToLocal();
+   try {
+  const pass = window.violaAdminPass || prompt("أدخلي كلمة مرور الإدارة لنشر التعديل:");
+  if (pass) {
+    window.violaAdminPass = pass;
+   ' await syncProductsToServer(pass)';
+  }
+} catch (err) {
+  alert("تم الحفظ محلياً، لكن فشل النشر على المستودع: " + err.message);
+}             
                 renderAdminProducts();
                 renderStore();
             }
