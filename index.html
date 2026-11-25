@@ -671,7 +671,21 @@ async function openAdminLogin() {
             document.getElementById('newProdUrls').value = '';
             filesInput.value = '';
             alert("تمت إضافة الشمعة بنجاح!");
-        }
+    
+    let pass = window.violaAdminPass;
+  if (!pass) {
+    pass = prompt("أدخل كلمة مرور الإدارة لنشر التعديل على الموقع:");
+    if (!pass) return;
+    window.violaAdminPass = pass;
+  }
+
+  try {
+    await syncProductsToServer(pass);
+  } catch (err) {
+    console.error("Sync error:", err);
+    alert("تمت الإضافة محلياً، لكن تعذر تحديث الملف على GitHub: " + err.message);
+  }   
+} 
 const VIOLA_WORKER_URL = "https://viola-admin-api.albarrirama.workers.dev";
 
 async function syncProductsToServer(adminPassword) {
@@ -780,3 +794,4 @@ if (brandTitleEl) {
     </script>
 </body>
 </html>
+        
