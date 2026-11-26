@@ -465,7 +465,7 @@
             // 2. عرض المنتجات
             const grid = document.getElementById('productsGrid');
             grid.innerHTML = '';
-            storeData.products.forEach(p => {
+           ( storeData.products||[]).forEach(p => {
                 grid.innerHTML += `
                     <div class="product-card">
                         <img src="${p.images[0] || ''}" alt="${p.name}" class="product-img" onclick="openModal(${p.id})">
