@@ -603,7 +603,8 @@ async function openAdminLogin() {
                             <strong>${p.name}</strong> — <span style="color: var(--primary);">${p.price}</span>
                             <br><small style="color: #777;">عدد الصور: ${p.images.length} | الألوان: ${(p.colors || []).join('، ')}</small>
                         </div>
-                        <button class="btn-danger" onclick="deleteProduct(${idx})">حذف</button>
+   <button class="btn-secondary" onclick="startEditProduct(${idx})">تعديل</button>
+<button class="btn-danger" onclick="deleteProduct(${idx})">حذف</button>                     
                     </div>
                 `;
             });
@@ -635,23 +636,36 @@ async function openAdminLogin() {
             if (images.length === 0) {
                 images.push("https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=600&q=80");
             }
+ const productPayload = {
+    id: editingProductIndex !== null && storeData.products[editingProductIndex]
+        ? storeData.products[editingProductIndex].id
+        : Date.now(),
+    name,
+    price,
+    desc,
+    colors,
+    images
+};
 
-            storeData.products.push({
-                id: Date.now(),
-                name, price, desc, colors, images
-            });
+const wasEditing = editingProductIndex !== null && !!storeData.products[editingProductIndex];
+
+if (wasEditing) {
+    storeData.products[editingProductIndex] = productPayload;
+} else {
+    storeData.products.push(productPayload);
+} 
 
             saveToLocal();
             renderAdminProducts();
             renderStore();
-
+cancelEditProduct();
             // تفريغ الحقول
             document.getElementById('newProdName').value = '';
             document.getElementById('newProdPrice').value = '';
             document.getElementById('newProdDesc').value = '';
             document.getElementById('newProdUrls').value = '';
             filesInput.value = '';
-            alert("تمت إضافة الشمعة بنجاح!");
+  alert(wasEditing ? "تم حفظ التعديلات بنجاح!" : "تمت إضافة الشمعة بنجاح!");      
     
     let pass = window.violaAdminPass;
   if (!pass) {
@@ -692,7 +706,43 @@ async function syncProductsToServer(adminPassword) {
                 reader.onerror = error => reject(error);
             });
         }
+let editingProductIndex = null;
 
+function startEditProduct(idx) {
+    const p = storeData.products[idx];
+    if (!p) return;
+
+    editingProductIndex = idx;
+    document.getElementById('newProdName').value = p.name || '';
+    document.getElementById('newProdPrice').value = p.price || '';
+    document.getElementById('newProdDesc').value = p.desc || '';
+    if (document.getElementById('newProdColors')) {
+        document.getElementById('newProdColors').value = (p.colors || []).join(', ');
+    }
+    if (document.getElementById('newProdUrls')) {
+        document.getElementById('newProdUrls').value = (p.images || []).filter(u => !u.startsWith('data:')).join('\n');
+    }
+
+    const submitBtn = document.getElementById('addProdBtn');
+    if (submitBtn) submitBtn.textContent = 'حفظ التعديلات';
+    const cancelBtn = document.getElementById('cancelEditBtn');
+    if (cancelBtn) cancelBtn.style.display = 'inline-block';
+}
+
+function cancelEditProduct() {
+    editingProductIndex = null;
+    document.getElementById('newProdName').value = '';
+    document.getElementById('newProdPrice').value = '';
+    document.getElementById('newProdDesc').value = '';
+    if (document.getElementById('newProdColors')) document.getElementById('newProdColors').value = '';
+    if (document.getElementById('newProdUrls')) document.getElementById('newProdUrls').value = '';
+    if (document.getElementById('newProdFiles')) document.getElementById('newProdFiles').value = '';
+
+    const submitBtn = document.getElementById('addProdBtn');
+    if (submitBtn) submitBtn.textContent = 'إضافة المنتج';
+    const cancelBtn = document.getElementById('cancelEditBtn');
+    if (cancelBtn) cancelBtn.style.display = 'none';
+}
        async function deleteProduct(index) {
             if (confirm("هل أنت متأكد من حذف هذا المنتج؟")) {
                 storeData.products.splice(index, 1);
