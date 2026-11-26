@@ -712,7 +712,7 @@ async function syncProductsToServer(adminPassword) {
             });
         }
 
-        function deleteProduct(index) {
+       async function deleteProduct(index) {
             if (confirm("هل أنت متأكد من حذف هذا المنتج؟")) {
                 storeData.products.splice(index, 1);
                 saveToLocal();
