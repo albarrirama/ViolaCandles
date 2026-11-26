@@ -701,7 +701,7 @@ async function syncProductsToServer(adminPassword) {
   const pass = window.violaAdminPass || prompt("أدخلي كلمة مرور الإدارة لنشر التعديل:");
   if (pass) {
     window.violaAdminPass = pass;
-   ' await syncProductsToServer(pass)';
+    await syncProductsToServer(pass);
   }
 } catch (err) {
   alert("تم الحفظ محلياً، لكن فشل النشر على المستودع: " + err.message);
