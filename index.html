@@ -749,7 +749,16 @@ async function syncProductsToServer(adminPassword) {
             link.click();
         }
 
-        renderStore();
+ renderStore();
+fetch("./products.json?v=" + Date.now())
+  .then(res => res.ok ? res.json() : Promise.reject(new Error("HTTP " + res.status)))
+  .then(data => {
+    if (Array.isArray(data) && typeof storeData !== "undefined") {
+      storeData.products = data;
+      renderStore();
+    }
+  })
+  .catch(err => console.warn("Failed to load products.json:", err));       
  let brandTapCount = 0;
 let brandTapTimer = null;
 const brandTitleEl = document.getElementById("brandTitle");
